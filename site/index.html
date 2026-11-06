@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="en" data-lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>coffee-templater — fill Word, Excel and PowerPoint templates</title>
+  <meta name="description" content="Open-source templating for .docx, .xlsx and .pptx: variables, loops, conditions, filters and images. Parse Office files to JSON and build them back. Free, MIT.">
+  <meta property="og:title" content="coffee-templater">
+  <meta property="og:description" content="Fill Word, Excel and PowerPoint templates from your data. Free and open source.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☕</text></svg>">
+  <link rel="stylesheet" href="style.css">
+  <script>
+    // pick language and theme before the first paint: saved choice, else browser/system preference
+    (function () {
+      var root = document.documentElement
+      var lang = localStorage.getItem('lang') || ((navigator.language || '').toLowerCase().indexOf('ru') === 0 ? 'ru' : 'en')
+      root.setAttribute('data-lang', lang)
+      root.setAttribute('lang', lang)
+      var theme = localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+      root.setAttribute('data-theme', theme)
+    })()
+  </script>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="#top"><span class="brand-cup">☕</span> coffee-templater</a>
+    <nav class="nav-links">
+      <a href="#features"><span data-l="en">Features</span><span data-l="ru">Возможности</span></a>
+      <a href="#demo"><span data-l="en">Demo</span><span data-l="ru">Демо</span></a>
+      <a href="#start"><span data-l="en">Quick start</span><span data-l="ru">Начало</span></a>
+      <a href="https://github.com/vitJR1/coffee-templater.js">GitHub</a>
+    </nav>
+    <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle dark / light theme" title="Dark / light">
+      <span class="to-dark">🌙</span><span class="to-light">☀️</span>
+    </button>
+    <div class="lang-switch" role="group" aria-label="Language">
+      <button type="button" data-set-lang="en">EN</button>
+      <button type="button" data-set-lang="ru">RU</button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ============================================================ hero -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow"><span data-l="en">Open source · MIT</span><span data-l="ru">Open source · MIT</span></p>
+        <h1>
+          <span data-l="en">Fill Word, Excel and PowerPoint templates from your data</span>
+          <span data-l="ru">Заполняйте шаблоны Word, Excel и PowerPoint данными</span>
+        </h1>
+        <p class="lead">
+          <span data-l="en">Put <code>{{tags}}</code> into a regular .docx, .xlsx or .pptx, pass JSON — get a finished document. Loops, conditions, filters and images included. Everything is free: no paid modules.</span>
+          <span data-l="ru">Расставьте <code>{{теги}}</code> в обычном .docx, .xlsx или .pptx, передайте JSON — получите готовый документ. Циклы, условия, фильтры и картинки — всё бесплатно, без платных модулей.</span>
+        </p>
+        <div class="cta">
+          <a class="btn btn-primary" href="#demo"><span data-l="en">Try it in the browser</span><span data-l="ru">Попробовать в браузере</span></a>
+          <a class="btn" href="https://github.com/vitJR1/coffee-templater.js"><span data-l="en">View on GitHub</span><span data-l="ru">Открыть на GitHub</span></a>
+        </div>
+        <div class="install">
+          <code id="install-cmd">npm install coffee-templater</code>
+          <button type="button" class="copy" data-copy="#install-cmd" aria-label="Copy">
+            <span data-l="en">Copy</span><span data-l="ru">Копировать</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="hero-visual" aria-hidden="true">
+        <div class="paper">
+          <div class="paper-tab">invoice.docx</div>
+          <p class="p-title">Invoice <mark>{{number}}</mark></p>
+          <p>Client: <mark>{{client.name}}</mark></p>
+          <table>
+            <tr><th>Item</th><th>Qty</th><th>Price</th></tr>
+            <tr><td><mark>{{#items}}{{name}}</mark></td><td><mark>{{qty}}</mark></td><td><mark>{{price}}{{/items}}</mark></td></tr>
+          </table>
+          <p><mark>{{#if paid}}</mark>Paid<mark>{{else}}</mark>Due<mark>{{/if}}</mark></p>
+        </div>
+        <div class="arrow">
+          <span class="arrow-label">+ JSON</span>
+          <span class="arrow-arrow">→</span>
+        </div>
+        <div class="paper paper-done">
+          <div class="paper-tab">invoice-42.docx</div>
+          <p class="p-title">Invoice 42</p>
+          <p>Client: Ivan Petrov</p>
+          <table>
+            <tr><th>Item</th><th>Qty</th><th>Price</th></tr>
+            <tr><td>Coffee</td><td>2</td><td>10.50</td></tr>
+            <tr><td>Tea</td><td>1</td><td>4.00</td></tr>
+          </table>
+          <p>Due</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ what & why -->
+  <section class="section" id="why">
+    <div class="wrap">
+      <h2><span data-l="en">What it is for</span><span data-l="ru">Для чего это</span></h2>
+      <p class="section-lead">
+        <span data-l="en">Backends generate documents all the time: invoices, contracts, acts, reports, exports. Non-developers design the layout in Office; your code fills in the data. coffee-templater is the piece in between.</span>
+        <span data-l="ru">Бэкенды постоянно генерируют документы: счета, договоры, акты, отчёты, выгрузки. Макет делают в Office люди без программирования, а код подставляет данные. coffee-templater — то, что их соединяет.</span>
+      </p>
+      <div class="cards">
+        <article class="card">
+          <div class="card-icon word">W</div>
+          <h3><span data-l="en">Contracts &amp; invoices</span><span data-l="ru">Договоры и счета</span></h3>
+          <p><span data-l="en">Word templates with tables of line items, optional clauses, signatures and logos.</span><span data-l="ru">Шаблоны Word с таблицами позиций, необязательными пунктами, подписями и логотипами.</span></p>
+        </article>
+        <article class="card">
+          <div class="card-icon excel">X</div>
+          <h3><span data-l="en">Reports &amp; exports</span><span data-l="ru">Отчёты и выгрузки</span></h3>
+          <p><span data-l="en">Excel sheets where rows repeat, numbers stay numbers and formulas like SUM stretch automatically.</span><span data-l="ru">Листы Excel, где строки повторяются, числа остаются числами, а формулы вроде SUM растягиваются сами.</span></p>
+        </article>
+        <article class="card">
+          <div class="card-icon ppt">P</div>
+          <h3><span data-l="en">Presentations</span><span data-l="ru">Презентации</span></h3>
+          <p><span data-l="en">PowerPoint decks with bullet lists, tables, speaker notes and pictures placed exactly in their boxes.</span><span data-l="ru">Слайды PowerPoint со списками, таблицами, заметками и картинками ровно в своих рамках.</span></p>
+        </article>
+        <article class="card">
+          <div class="card-icon json">{ }</div>
+          <h3><span data-l="en">Reading documents</span><span data-l="ru">Чтение документов</span></h3>
+          <p><span data-l="en">Parse uploaded files into plain JSON: import Excel rows as objects, edit Word text, extract text for search.</span><span data-l="ru">Разбор загруженных файлов в JSON: строки Excel как объекты, правка текста Word, извлечение текста для поиска.</span></p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ features -->
+  <section class="section section-alt" id="features">
+    <div class="wrap">
+      <h2><span data-l="en">Features</span><span data-l="ru">Возможности</span></h2>
+      <div class="features">
+        <div class="feature">
+          <h3><span data-l="en">Loops that know what to repeat</span><span data-l="ru">Циклы понимают, что повторять</span></h3>
+          <p><span data-l="en">Text inside a paragraph, whole paragraphs, table rows or sheet rows — decided by where you put the tags.</span><span data-l="ru">Текст внутри абзаца, целые абзацы, строки таблицы или листа — по тому, где стоят теги.</span></p>
+        </div>
+        <div class="feature">
+          <h3><span data-l="en">Conditions &amp; filters</span><span data-l="ru">Условия и фильтры</span></h3>
+          <p><span data-l="en"><code>{{#if}}…{{else}}</code>, ~40 built-in filters (numbers, currency, dates, sorting) and your own in plain JS.</span><span data-l="ru"><code>{{#if}}…{{else}}</code>, около 40 встроенных фильтров (числа, валюты, даты, сортировка) и свои на обычном JS.</span></p>
+        </div>
+        <div class="feature">
+          <h3><span data-l="en">Your syntax</span><span data-l="ru">Свой синтаксис</span></h3>
+          <p><span data-l="en">Any delimiters — <code>{{x}}</code>, <code>${x}</code>, <code>[[x]]</code>, <code>&lt;&lt;x&gt;&gt;</code> — and <code>\{{escaping}}</code> for literal text.</span><span data-l="ru">Любые разделители — <code>{{x}}</code>, <code>${x}</code>, <code>[[x]]</code>, <code>&lt;&lt;x&gt;&gt;</code> — и <code>\{{экранирование}}</code> для буквального текста.</span></p>
+        </div>
+        <div class="feature">
+          <h3><span data-l="en">Survives Word</span><span data-l="ru">Не боится Word</span></h3>
+          <p><span data-l="en">Word splits text into fragments while you type. Tags broken across them are glued back automatically.</span><span data-l="ru">Word режет текст на фрагменты при наборе. Разорванные теги склеиваются автоматически.</span></p>
+        </div>
+        <div class="feature">
+          <h3><span data-l="en">Images</span><span data-l="ru">Картинки</span></h3>
+          <p><span data-l="en">PNG, JPEG, GIF, SVG with auto-detected size — inline in Word, fitted into text boxes in PowerPoint.</span><span data-l="ru">PNG, JPEG, GIF, SVG с автоопределением размера — в строку в Word и в рамку в PowerPoint.</span></p>
+        </div>
+        <div class="feature">
+          <h3><span data-l="en">Know your template</span><span data-l="ru">Знайте свой шаблон</span></h3>
+          <p><span data-l="en"><code>inspect()</code> lists every variable and returns a sample data shape — build forms or validate input.</span><span data-l="ru"><code>inspect()</code> перечисляет переменные и возвращает пример данных — для форм и проверки входа.</span></p>
+        </div>
+        <div class="feature">
+          <h3><span data-l="en">Documents as JSON</span><span data-l="ru">Документ как JSON</span></h3>
+          <p><span data-l="en"><code>parse()</code> → edit → <code>build()</code>, keeping all formatting the model doesn't touch.</span><span data-l="ru"><code>parse()</code> → правка → <code>build()</code> с сохранением всего форматирования.</span></p>
+        </div>
+        <div class="feature">
+          <h3><span data-l="en">Safe for uploads</span><span data-l="ru">Безопасно для загрузок</span></h3>
+          <p><span data-l="en">Limits against zip bombs, deep XML and runaway loops; values are always escaped.</span><span data-l="ru">Лимиты против zip-бомб, глубокого XML и бесконечных циклов; значения всегда экранируются.</span></p>
+        </div>
+        <div class="feature">
+          <h3><span data-l="en">Runs everywhere</span><span data-l="ru">Работает везде</span></h3>
+          <p><span data-l="en">Node.js 18+ and browsers, TypeScript types included, no native dependencies.</span><span data-l="ru">Node.js 18+ и браузеры, типы TypeScript в комплекте, без нативных зависимостей.</span></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ syntax -->
+  <section class="section" id="syntax">
+    <div class="wrap two-col">
+      <div>
+        <h2><span data-l="en">Template syntax</span><span data-l="ru">Синтаксис шаблонов</span></h2>
+        <p class="section-lead">
+          <span data-l="en">Small and Mustache-like. Type it right into Word, Excel or PowerPoint.</span>
+          <span data-l="ru">Небольшой, в духе Mustache. Пишется прямо в Word, Excel или PowerPoint.</span>
+        </p>
+        <table class="syntax">
+          <tr><td><code>{{client.name}}</code></td><td><span data-l="en">variable</span><span data-l="ru">переменная</span></td></tr>
+          <tr><td><code>{{price | number: 2}}</code></td><td><span data-l="en">filter</span><span data-l="ru">фильтр</span></td></tr>
+          <tr><td><code>{{#items}}…{{/items}}</code></td><td><span data-l="en">loop</span><span data-l="ru">цикл</span></td></tr>
+          <tr><td><code>{{#if paid}}…{{else}}…{{/if}}</code></td><td><span data-l="en">condition</span><span data-l="ru">условие</span></td></tr>
+          <tr><td><code>{{@number}}</code>, <code>{{../title}}</code></td><td><span data-l="en">loop index, parent scope</span><span data-l="ru">номер в цикле, внешняя область</span></td></tr>
+          <tr><td><code>{{%logo}}</code></td><td><span data-l="en">image</span><span data-l="ru">картинка</span></td></tr>
+          <tr><td><code>\{{text}}</code></td><td><span data-l="en">literal <code>{{text}}</code></span><span data-l="ru">буквально <code>{{text}}</code></span></td></tr>
+        </table>
+      </div>
+      <div>
+        <h3 class="sub"><span data-l="en">Excel that stays Excel</span><span data-l="ru">Excel остаётся Excel</span></h3>
+        <div class="sheet" aria-hidden="true">
+          <div class="sheet-row head"><span></span><span>A</span><span>B</span><span>C</span><span>D</span></div>
+          <div class="sheet-row"><span>2</span><span>Item</span><span>Qty</span><span>Price</span><span>Sum</span></div>
+          <div class="sheet-row tpl"><span>3</span><span><mark>{{#rows}}{{name}}</mark></span><span><mark>{{qty}}</mark></span><span><mark>{{price}}{{/rows}}</mark></span><span>=B3*C3</span></div>
+          <div class="sheet-row"><span>4</span><span>Total</span><span></span><span></span><span>=SUM(D3:D3)</span></div>
+        </div>
+        <p class="sheet-note">
+          <span data-l="en">With 100 rows of data, row 3 becomes rows 3–102, every <code>=B3*C3</code> points to its own row, and the total becomes <code>=SUM(D3:D102)</code>.</span>
+          <span data-l="ru">Со 100 строками данных строка 3 превратится в строки 3–102, каждая <code>=B3*C3</code> будет ссылаться на свою строку, а итог станет <code>=SUM(D3:D102)</code>.</span>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ demo -->
+  <section class="section section-alt" id="demo">
+    <div class="wrap">
+      <h2><span data-l="en">Try it right here</span><span data-l="ru">Попробуйте прямо здесь</span></h2>
+      <p class="section-lead">
+        <span data-l="en">This demo runs the real library in your browser. Files never leave your computer.</span>
+        <span data-l="ru">Демо запускает настоящую библиотеку в вашем браузере. Файлы никуда не отправляются.</span>
+        <span class="engine-badge" id="engine-badge"></span>
+      </p>
+
+      <div class="demo">
+        <div class="demo-step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h3><span data-l="en">Choose a template</span><span data-l="ru">Выберите шаблон</span></h3>
+            <div class="samples">
+              <button type="button" class="sample" data-sample="invoice"><span class="dot word"></span>invoice.docx</button>
+              <button type="button" class="sample" data-sample="report"><span class="dot excel"></span>report.xlsx</button>
+              <button type="button" class="sample" data-sample="deck"><span class="dot ppt"></span>deck.pptx</button>
+              <label class="sample upload">
+                <input type="file" id="file" accept=".docx,.xlsx,.pptx">
+                <span data-l="en">Upload your own…</span><span data-l="ru">Загрузить свой…</span>
+              </label>
+            </div>
+            <p class="hint" id="template-name"></p>
+            <details class="options">
+              <summary><span data-l="en">Delimiters</span><span data-l="ru">Разделители</span></summary>
+              <label><span data-l="en">start</span><span data-l="ru">начало</span> <input id="d-start" value="{{" size="4"></label>
+              <label><span data-l="en">end</span><span data-l="ru">конец</span> <input id="d-end" value="}}" size="4"></label>
+            </details>
+          </div>
+        </div>
+
+        <div class="demo-step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h3><span data-l="en">Data (JSON)</span><span data-l="ru">Данные (JSON)</span></h3>
+            <div class="vars" id="vars"></div>
+            <textarea id="data" spellcheck="false" rows="14" aria-label="JSON data"></textarea>
+          </div>
+        </div>
+
+        <div class="demo-step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h3><span data-l="en">Render</span><span data-l="ru">Сгенерировать</span></h3>
+            <button type="button" class="btn btn-primary" id="render" disabled>
+              <span data-l="en">Render document</span><span data-l="ru">Сгенерировать документ</span>
+            </button>
+            <a class="btn" id="download" hidden></a>
+            <div class="error" id="error" hidden></div>
+            <div class="preview" id="preview" hidden>
+              <div class="preview-head"><span data-l="en">Text of the result</span><span data-l="ru">Текст результата</span></div>
+              <pre id="preview-text"></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ quick start -->
+  <section class="section" id="start">
+    <div class="wrap">
+      <h2><span data-l="en">Quick start</span><span data-l="ru">Быстрый старт</span></h2>
+      <div class="code-grid">
+        <div>
+          <h3 class="sub"><span data-l="en">Render a template</span><span data-l="ru">Заполнить шаблон</span></h3>
+<pre class="code"><code><span class="k">import</span> { readFileSync, writeFileSync } <span class="k">from</span> <span class="s">'node:fs'</span>
+<span class="k">import</span> { createTemplater } <span class="k">from</span> <span class="s">'coffee-templater'</span>
+
+<span class="k">const</span> templater = createTemplater()
+<span class="k">const</span> template = templater.compile(readFileSync(<span class="s">'invoice.docx'</span>))
+
+writeFileSync(<span class="s">'invoice-42.docx'</span>, template.render({
+  number: <span class="n">42</span>,
+  client: { name: <span class="s">'Ivan Petrov'</span> },
+  items: [{ name: <span class="s">'Coffee'</span>, qty: <span class="n">2</span>, price: <span class="n">10.5</span> }],
+  paid: <span class="n">false</span>,
+}))</code></pre>
+        </div>
+        <div>
+          <h3 class="sub"><span data-l="en">Read an uploaded Excel file</span><span data-l="ru">Прочитать загруженный Excel</span></h3>
+<pre class="code"><code><span class="k">import</span> { parseXlsxFile, sheetToObjects } <span class="k">from</span> <span class="s">'coffee-templater'</span>
+
+<span class="k">const</span> book = parseXlsxFile(upload)
+<span class="k">const</span> rows = sheetToObjects(book.sheets[<span class="n">0</span>])
+<span class="c">// [{ Name: 'Tea', Qty: 2, Date: '2024-05-17' }, …]</span></code></pre>
+          <h3 class="sub"><span data-l="en">Your own filters and syntax</span><span data-l="ru">Свои фильтры и синтаксис</span></h3>
+<pre class="code"><code>createTemplater({
+  delimiters: [<span class="s">'${'</span>, <span class="s">'}'</span>],
+  timeZone: <span class="s">'Europe/Moscow'</span>,
+  filters: { money: (v, cur) =&gt; <span class="s">`${v.toFixed(2)} ${cur}`</span> },
+})
+<span class="c">// ${ total | money: "RUB" }</span></code></pre>
+        </div>
+      </div>
+      <p class="more">
+        <a href="https://github.com/vitJR1/coffee-templater.js#readme">README</a> ·
+        <a href="https://github.com/vitJR1/coffee-templater.js/blob/main/DOCS.md"><span data-l="en">Full guide (Russian)</span><span data-l="ru">Полное руководство</span></a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================ engine -->
+  <section class="section section-alt" id="engine">
+    <div class="wrap">
+      <h2><span data-l="en">One engine, many languages</span><span data-l="ru">Одно ядро — много языков</span></h2>
+      <p class="section-lead">
+        <span data-l="en">All document work happens in <a href="https://github.com/vitJR1/coffee-templater-engine">coffee-templater-engine</a> — a Rust core compiled to WebAssembly and bundled inside the npm package. The same engine is meant to power Go and Python libraries, so a template renders byte-for-byte the same everywhere.</span>
+        <span data-l="ru">Вся работа с документами выполняется в <a href="https://github.com/vitJR1/coffee-templater-engine">coffee-templater-engine</a> — ядре на Rust, скомпилированном в WebAssembly и встроенном в npm-пакет. На этом же ядре будут работать библиотеки для Go и Python, поэтому шаблон везде даёт побайтно одинаковый результат.</span>
+      </p>
+      <div class="arch" aria-hidden="true">
+        <div class="arch-box">
+          <strong>JavaScript / TypeScript</strong>
+          <span>coffee-templater · npm</span>
+        </div>
+        <div class="arch-box soon">
+          <strong>Go</strong>
+          <span data-l="en">planned</span><span data-l="ru">в планах</span>
+        </div>
+        <div class="arch-box soon">
+          <strong>Python</strong>
+          <span data-l="en">planned</span><span data-l="ru">в планах</span>
+        </div>
+        <div class="arch-core">
+          <strong>coffee-templater-engine</strong>
+          <span>Rust → WebAssembly · <span data-l="en">templates, document model, ZIP/XML, safety limits</span><span data-l="ru">шаблоны, модель документа, ZIP/XML, лимиты</span></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <span>☕ coffee-templater · MIT</span>
+    <nav>
+      <a href="https://github.com/vitJR1/coffee-templater.js">GitHub</a>
+      <a href="https://github.com/vitJR1/coffee-templater-engine">Engine</a>
+      <a href="https://github.com/vitJR1/coffee-templater.js/issues"><span data-l="en">Issues</span><span data-l="ru">Задачи</span></a>
+    </nav>
+    <span class="footer-note"><span data-l="en">If it helps you, a ⭐ on GitHub helps the project.</span><span data-l="ru">Если пригодилось — поставьте ⭐ на GitHub.</span></span>
+  </div>
+</footer>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

@@ -53,10 +53,13 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "npm run typecheck && npm test && npm run build"
+    "prepublishOnly": "npm run typecheck && npm test && npm run build",
+    "build:site": "npm run engine --silent && node scripts/build-site.mjs",
+    "site": "npm run build:site --silent && npx --yes serve site -l 4173"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",
+    "esbuild": "^0.27.7",
     "tsup": "^8.5.1",
     "typescript": "~5.9",
     "vitest": "^5.1.0"
