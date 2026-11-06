@@ -357,3 +357,9 @@ See [DOCS.md](DOCS.md) (Russian) for the full guide and internals.
 ## License
 
 MIT
+
+## Support
+
+If this project helps you, consider buying me a coffee ☕
+
+- PayPal ypi-2-22@mail.ru
