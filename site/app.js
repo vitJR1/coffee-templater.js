@@ -1,6 +1,7 @@
 // Demo + small page behaviours. Runs the real library (lib/coffee-templater.js, built by
 // scripts/build-site.mjs) entirely in the browser.
 import { createTemplater, engineInfo, extractText, initEngine, TemplateError } from './lib/coffee-templater.js'
+import { renderPreview } from './preview.js'
 
 // ------------------------------------------------------------------------------ language & copy
 
@@ -105,8 +106,19 @@ const els = {
   render: $('render'),
   download: $('download'),
   error: $('error'),
-  preview: $('preview'),
+  result: $('result'),
+  visual: $('preview-visual'),
   previewText: $('preview-text'),
+}
+
+// result tabs: visual preview / plain text
+document.querySelectorAll('.result .tab').forEach((tab) =>
+  tab.addEventListener('click', () => showTab(tab.dataset.tab)),
+)
+function showTab(name) {
+  document.querySelectorAll('.result .tab').forEach((t) => t.classList.toggle('active', t.dataset.tab === name))
+  els.visual.hidden = name !== 'visual'
+  els.previewText.hidden = name !== 'text'
 }
 
 const state = { bytes: null, name: '', images: [], logo: null, url: null }
@@ -129,7 +141,7 @@ function showError(e) {
 
 function clearResult() {
   els.error.hidden = true
-  els.preview.hidden = true
+  els.result.hidden = true
   els.download.hidden = true
   if (state.url) URL.revokeObjectURL(state.url)
   state.url = null
@@ -230,7 +242,15 @@ async function render() {
     els.download.textContent = `⬇ ${t('Download', 'Скачать')} ${fileName}`
     els.download.hidden = false
     els.previewText.textContent = extractText(out)
-    els.preview.hidden = false
+    els.result.hidden = false
+    showTab('visual')
+    els.visual.innerHTML = `<p class="preview-loading">${t('Rendering preview…', 'Готовлю превью…')}</p>`
+    try {
+      await renderPreview(out, ext, els.visual, html.getAttribute('data-lang'))
+    } catch (e) {
+      console.error(e)
+      els.visual.innerHTML = `<p class="preview-loading">${t('Preview is not available for this file — see the Text tab.', 'Превью для этого файла недоступно — см. вкладку «Текст».')}</p>`
+    }
   } catch (e) {
     showError(e)
   }

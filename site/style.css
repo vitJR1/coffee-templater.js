@@ -288,3 +288,59 @@ textarea:focus, .options input:focus { outline: 2px solid var(--accent); outline
 
 .logo-option { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .logo-option input { accent-color: var(--accent); }
+
+/* ------------------------------------------------------------------ result preview */
+.result { margin-top: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+.result-head { display: flex; align-items: center; gap: 4px; padding: 8px 10px; border-bottom: 1px solid var(--line); background: var(--bg-alt); flex-wrap: wrap; }
+.tab { border: 0; background: transparent; color: var(--muted); font: 600 0.9rem var(--font); padding: 6px 12px; border-radius: 8px; cursor: pointer; }
+.tab:hover { color: var(--text); }
+.tab.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08); }
+.result-hint { margin-left: auto; color: var(--muted); font-size: 0.8rem; padding-right: 4px; }
+.result-body { padding: 16px; }
+.preview-text { margin: 0; max-height: 520px; overflow: auto; font: 0.82rem/1.5 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+.preview-loading, .preview-note { color: var(--muted); font-size: 0.88rem; margin: 8px 0 0; }
+.preview-visual { min-height: 120px; }
+
+/* Word (docx-preview renders white pages at real size; we zoom them to fit) */
+.docx-host { max-height: 640px; overflow: auto; border-radius: 10px; }
+.docx-host .docx-wrapper { background: var(--bg-alt) !important; padding: 20px !important; }
+.docx-host .docx-wrapper > section.docx { box-shadow: var(--shadow) !important; margin-bottom: 20px !important; }
+
+/* Excel */
+.xlsx-grid { max-height: 520px; overflow: auto; border: 1px solid var(--line); border-radius: 10px 10px 0 0; background: #fff; }
+.xlsx-grid table { border-collapse: collapse; font: 0.8rem/1.3 var(--font); color: #222; min-width: 100%; }
+.xlsx-grid th, .xlsx-grid td { border: 1px solid #e2e2e2; padding: 4px 8px; white-space: nowrap; max-width: 320px; overflow: hidden; text-overflow: ellipsis; }
+.xlsx-grid th { background: #f3f3f3; color: #666; font-weight: 500; position: sticky; top: 0; z-index: 1; text-align: center; }
+.xlsx-grid tbody th { position: sticky; left: 0; top: auto; min-width: 40px; }
+.xlsx-grid th.corner { left: 0; z-index: 2; }
+.xlsx-grid td { min-width: 70px; height: 24px; }
+.xlsx-grid td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.xlsx-grid td.bool { text-align: center; }
+.xlsx-grid td.formula { color: #1d6f42; font-family: var(--mono); font-size: 0.75rem; }
+.xlsx-grid td.err { color: #c00; }
+.sheet-tabs { display: flex; gap: 2px; border: 1px solid var(--line); border-top: 0; border-radius: 0 0 10px 10px; background: var(--bg-alt); padding: 0 6px; overflow-x: auto; }
+.sheet-tabs button { border: 0; background: transparent; color: var(--muted); font: 500 0.82rem var(--font); padding: 6px 14px; cursor: pointer; border-bottom: 2px solid transparent; }
+.sheet-tabs button.active { color: #1d6f42; border-bottom-color: #1d6f42; background: var(--surface); }
+
+/* PowerPoint */
+.slides { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); gap: 18px; }
+.slide-figure { margin: 0; }
+.slide-figure figcaption { color: var(--muted); font-size: 0.8rem; margin-top: 6px; }
+.slide-notes { font-style: italic; }
+.slide {
+  position: relative; width: 100%; background: #fff; color: #111; border: 1px solid var(--line); border-radius: 6px;
+  box-shadow: var(--shadow); overflow: hidden; container-type: inline-size; font-family: Calibri, Carlito, var(--font);
+}
+.slide .shape { position: absolute; overflow: hidden; }
+.slide .text { display: flex; flex-direction: column; padding: 0.6cqw 0.9cqw; }
+.slide .text.anchor-ctr { justify-content: center; }
+.slide .text.anchor-b { justify-content: flex-end; }
+.slide .text p { margin: 0; line-height: 1.15; overflow-wrap: anywhere; }
+.slide .table { overflow: visible; }
+.slide table { width: 100%; height: 100%; border-collapse: collapse; }
+.slide td { border: 0.15cqw solid #fff; background: #e8ecf5; padding: 0.4cqw 0.8cqw; white-space: pre-line; }
+.slide tr.head td { background: #4472c4; color: #fff; font-weight: 700; }
+.slide .picture { object-fit: contain; }
+.slide .other { border: 0.15cqw dashed #bbb; color: #999; font-size: 1.4cqw; display: grid; place-items: center; }
+
+.footer-credits { width: 100%; font-size: 0.8rem; }

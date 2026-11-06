@@ -59,6 +59,7 @@
   },
   "devDependencies": {
     "@types/node": "^26.6.6",
+    "docx-preview": "^0.4.1",
     "esbuild": "^0.27.7",
     "tsup": "^8.5.1",
     "typescript": "~5.9",
