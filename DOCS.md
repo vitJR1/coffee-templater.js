@@ -922,6 +922,23 @@ npm run build       # tsup → dist: ESM + CJS + d.ts
 - Для ручной проверки результатов полезно открывать их в Word / Excel / PowerPoint или LibreOffice:
   они строже Python-библиотек.
 
+### CI и релизы
+
+- **CI** (`.github/workflows/ci.yml`): на каждый push и PR — typecheck, тесты и сборка на Node 22 и 24;
+  на push в `main` дополнительно собирается `.tgz` пакета и прикладывается к запуску как артефакт.
+- **Релиз** (`.github/workflows/release.yml`): запускается push'ем тега `v*`, проверяет, что тег
+  совпадает с версией в `package.json`, прогоняет тесты, публикует пакет в npm и создаёт
+  GitHub Release с `.tgz` и автоматическими release notes.
+
+  ```bash
+  npm version patch          # или minor / major / prerelease --preid beta
+  git push --follow-tags
+  ```
+
+  Теги с суффиксом (`v1.0.0-beta.1`) публикуются в npm под dist-tag `next` и помечаются как pre-release.
+  Нужен секрет репозитория `NPM_TOKEN`. Если в `package.json` есть поле `repository`, публикация
+  идёт с npm provenance (подтверждённое происхождение сборки).
+
 ---
 
 ## 17. Ограничения и планы
