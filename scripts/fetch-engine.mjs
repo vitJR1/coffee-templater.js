@@ -7,9 +7,14 @@
 //
 // Source, in order:
 //   1. COFFEE_ENGINE_WASM=/path/to/coffee_core.wasm   — a local engine build (engine development)
-//   2. the GitHub Release `v<version>` of the engine   — pinned in package.json → "coffeeEngine"
+//   2. a GitHub Release of the engine                   — package.json → "coffeeEngine"
 //
-// Downloads are cached in node_modules/.cache/coffee-engine and verified against the pinned sha256.
+// "coffeeEngine": { "repository", "version", "release"?, "sha256"? }
+//   release  release tag to download from; default `v<version>`. A rolling tag such as `nightly` tracks
+//            the engine's main branch: it is never cached and not checked against sha256.
+//   sha256   expected checksum of coffee_core.wasm for a fixed release (required to publish to npm).
+//
+// Fixed releases are cached in node_modules/.cache/coffee-engine and verified against the pinned sha256.
 
 import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
@@ -21,7 +26,10 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = join(ROOT, 'src', 'engine', 'wasm-binary.ts')
 const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'))
 const pin = pkg.coffeeEngine
-if (!pin?.version || !pin?.repository) fail('package.json must define "coffeeEngine": { "repository", "version", "sha256" }')
+if (!pin?.version || !pin?.repository) fail('package.json must define "coffeeEngine": { "repository", "version", "release"?, "sha256"? }')
+const tag = pin.release ?? `v${pin.version}`
+/** Version tags are immutable; anything else (e.g. `nightly`) moves with the engine's main branch. */
+const rolling = !/^v\d/.test(tag)
 
 /** Bump when the layout of the generated module changes. */
 const FORMAT = 2
@@ -38,12 +46,12 @@ function checkWasm(buf, where) {
 
 async function download() {
   const cacheDir = join(ROOT, 'node_modules', '.cache', 'coffee-engine')
-  const cached = join(cacheDir, `coffee_core-${pin.version}.wasm`)
-  if (existsSync(cached)) {
+  const cached = join(cacheDir, `coffee_core-${tag}.wasm`)
+  if (!rolling && existsSync(cached)) {
     const buf = readFileSync(cached)
-    if (!pin.sha256 || sha256(buf) === pin.sha256) return { buf, source: `cache (v${pin.version})` }
+    if (!pin.sha256 || sha256(buf) === pin.sha256) return { buf, source: `cache (${tag})` }
   }
-  const url = `https://github.com/${pin.repository}/releases/download/v${pin.version}/coffee_core.wasm`
+  const url = `https://github.com/${pin.repository}/releases/download/${tag}/coffee_core.wasm`
   let res
   try {
     res = await fetch(url, { redirect: 'follow' })
@@ -53,12 +61,16 @@ async function download() {
   if (!res.ok) {
     fail(
       `Cannot download the engine: ${url} → HTTP ${res.status}.\n` +
-        `Make sure release v${pin.version} of ${pin.repository} exists, or set COFFEE_ENGINE_WASM=/path/to/coffee_core.wasm.`,
+        `Make sure release ${tag} of ${pin.repository} exists, or set COFFEE_ENGINE_WASM=/path/to/coffee_core.wasm.`,
     )
   }
   const buf = Buffer.from(await res.arrayBuffer())
   checkWasm(buf, url)
   const actual = sha256(buf)
+  if (rolling) {
+    console.warn(`[coffee-engine] using the rolling "${tag}" engine build (sha256 ${actual}); pin a version release before publishing`)
+    return { buf, source: url }
+  }
   if (pin.sha256 && actual !== pin.sha256) {
     fail(`sha256 mismatch for ${url}\n  expected ${pin.sha256}\n  actual   ${actual}`)
   }
@@ -79,7 +91,7 @@ async function main() {
     checkWasm(buf, path)
     source = path
     if (pin.sha256 && sha256(buf) !== pin.sha256) {
-      console.warn(`[coffee-engine] note: local engine differs from the pinned v${pin.version} (sha256 ${sha256(buf)})`)
+      console.warn(`[coffee-engine] note: local engine differs from the pinned ${tag} (sha256 ${sha256(buf)})`)
     }
   } else {
     ;({ buf, source } = await download())

@@ -64,6 +64,7 @@
   "coffeeEngine": {
     "repository": "vitJR1/coffee-templater-engine",
     "version": "0.1.0",
+    "release": "nightly",
     "sha256": null
   },
   "dependencies": {

@@ -32,6 +32,16 @@ jobs:
 
       - run: npm ci
 
+      - name: Check the engine is pinned to a fixed release
+        run: |
+          node -e '
+            const e = require("./package.json").coffeeEngine
+            const tag = e.release ?? `v${e.version}`
+            if (!/^v\d/.test(tag) || !e.sha256) {
+              console.error(`::error::coffeeEngine must point to a version release (v*) with a sha256 to publish; got release "${tag}", sha256 ${e.sha256}`)
+              process.exit(1)
+            }'
+
       - name: Check tag matches package.json version
         run: |
           TAG="${GITHUB_REF_NAME#v}"

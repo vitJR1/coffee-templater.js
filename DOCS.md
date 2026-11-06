@@ -937,15 +937,21 @@ npm run engine      # только обновить встроенное ядр�
 
 ### Откуда берётся ядро
 
-Версия ядра закреплена в `package.json`:
+Версия ядра задаётся в `package.json`:
 
 ```json
-"coffeeEngine": { "repository": "vitJR1/coffee-templater-engine", "version": "0.1.0", "sha256": "…" }
+"coffeeEngine": { "repository": "vitJR1/coffee-templater-engine", "version": "0.1.0", "release": "nightly", "sha256": null }
 ```
 
-- По умолчанию `npm run engine` (запускается автоматически перед `test`, `typecheck`, `build`)
-  скачивает `coffee_core.wasm` из релиза `v<version>`, кэширует его в
-  `node_modules/.cache/coffee-engine` и проверяет sha256.
+- `release` — из какого GitHub Release ядра брать `coffee_core.wasm` (по умолчанию `v<version>`).
+  - **Плавающий релиз** (`nightly`) обновляется при каждом пуше в `main` ядра. Он подходит для
+    разработки и CI: библиотека всегда тестируется с актуальным ядром. Такой релиз не кэшируется
+    и не сверяется по sha256.
+  - **Релиз версии** (`v0.1.0`) неизменен. Он кэшируется в `node_modules/.cache/coffee-engine`
+    и проверяется по `sha256`.
+- `npm run engine` запускается автоматически перед `test`, `typecheck` и `build`.
+- **Публикация в npm** возможна только с релизом версии и указанным `sha256`: workflow `release.yml`
+  проверяет это до публикации, чтобы в npm не ушла непредсказуемая сборка ядра.
 - Для разработки ядра используйте локальную сборку:
 
   ```bash
@@ -953,9 +959,9 @@ npm run engine      # только обновить встроенное ядр�
   COFFEE_ENGINE_WASM=../coffee-templater-engine/dist/coffee_core.wasm npm test
   ```
 
-- **Обновление ядра:** выпустите релиз в репозитории ядра (тег `vX.Y.Z`), затем поменяйте здесь
-  `coffeeEngine.version` и `coffeeEngine.sha256` (sha256 файла `coffee_core.wasm` из релиза,
-  он же лежит рядом в `coffee_core.wasm.sha256`).
+- **Перед публикацией:** выпустите релиз в репозитории ядра (тег `vX.Y.Z`), затем пропишите здесь
+  `"version": "X.Y.Z"`, уберите `"release"` (или укажите `"vX.Y.Z"`) и задайте `"sha256"` — контрольную
+  сумму `coffee_core.wasm` из релиза (она лежит рядом, в `coffee_core.wasm.sha256`).
 
 ### Прочее
 
@@ -986,7 +992,7 @@ npm run engine      # только обновить встроенное ядр�
   Нужен секрет репозитория `NPM_TOKEN`. Если в `package.json` есть поле `repository`, публикация
   идёт с npm provenance (подтверждённое происхождение сборки).
 
-Оба workflow скачивают ядро из релиза, поэтому у закреплённой версии ядра должен быть GitHub Release.
+Оба workflow скачивают ядро из релиза, указанного в `coffeeEngine.release`.
 
 ---
 
