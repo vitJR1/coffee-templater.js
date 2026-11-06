@@ -3,6 +3,10 @@
 Open-source templating engine for **Word (.docx)**, **Excel (.xlsx)** and **PowerPoint (.pptx)** — plus a
 JSON document model to parse Office files on the backend and build them back.
 
+Powered by [coffee-templater-engine](https://github.com/vitJR1/coffee-templater-engine) — a Rust core
+compiled to WebAssembly and bundled inside this package. The same engine is meant to back Go and Python
+libraries, so documents render identically everywhere.
+
 - Variables, loops, conditions, `else`, filters, images — **all free and MIT-licensed**
 - Configurable tag delimiters (`{{x}}`, `${x}`, `[[x]]`, `<<x>>`, …) and syntax sigils
 - Escaping: `\{{not a tag}}` prints the delimiters literally; values are always XML-escaped
@@ -11,7 +15,9 @@ JSON document model to parse Office files on the backend and build them back.
 - Excel: numbers stay numbers, rows below a loop shift down, formulas / merged cells are adjusted
 - `inspect()` lists template variables and returns a sample data shape — build forms or validate input
 - `parse()` → plain JSON model → `build()`: edit documents programmatically without losing formatting
-- TypeScript-first, zero native dependencies, works in Node.js ≥ 18 and browsers (ESM + CJS)
+- Safe for untrusted uploads: limits against zip bombs, deep XML and runaway loops
+- TypeScript-first, no native dependencies (the engine is WebAssembly), works in Node.js ≥ 18 and
+  browsers (ESM + CJS)
 
 ```bash
 npm install coffee-templater
@@ -160,8 +166,17 @@ createTemplater({
   strict: false,              // throw TemplateError 'missing_value' instead of nullGetter
   linebreaks: true,           // '\n' → line break, '\t' → tab (Word)
   stringify: (value) => '…',  // how non-strings are printed (default: numbers, ISO dates, JSON)
+  timeZone: 'Europe/Moscow',  // zone for JS Dates in data: 'local' or IANA name (default: UTC)
+  limits: { maxEntries: 10_000, maxLoopIterations: 1_000_000 /* … */ }, // safety limits, 0 = off
 })
 ```
+
+**Dates.** A JS `Date` is an instant and is formatted in **UTC** by default, so a template renders the
+same on every server. Set `timeZone` to print local time. Date strings without a zone
+(`"2024-05-17"`) are printed as written.
+
+**Browsers.** Optionally call `await initEngine()` once at startup: it compiles the WebAssembly engine
+asynchronously instead of on the first call.
 
 ## Inspecting templates
 
@@ -192,8 +207,13 @@ try {
 }
 ```
 
-Codes: `unclosed_tag`, `unclosed_section`, `unmatched_close`, `invalid_expression`, `unknown_filter`,
+Template codes: `unclosed_tag`, `unclosed_section`, `unmatched_close`, `invalid_expression`, `unknown_filter`,
 `filter_failed`, `missing_value`, `invalid_section`, `invalid_image`, `unsupported`.
+Engine codes: `invalid_document`, `unsupported_format`, `invalid_model`, `invalid_options`,
+`limit_exceeded`, `host_error`, `internal`.
+
+All mistakes in tags are reported at once: `e.errors` lists every `{ code, message, tag, part }`,
+and the error itself describes the first one.
 
 ## Document model: parse → JSON → build
 
@@ -317,13 +337,22 @@ Contributions are welcome!
 ## Development
 
 ```bash
-npm install       # requires Node.js 22+ for the dev tooling
+npm install        # requires Node.js 22+ for the dev tooling
 npm test           # vitest
 npm run typecheck
 npm run build      # tsup → dist (ESM + CJS + d.ts)
 ```
 
+The engine is not vendored: `npm run engine` (run automatically before test/typecheck/build) downloads
+`coffee_core.wasm` from the engine's GitHub Release pinned in `package.json` → `coffeeEngine`, verifies its
+sha256 and embeds it. To develop against a local engine build:
+
+```bash
+COFFEE_ENGINE_WASM=../coffee-templater-engine/dist/coffee_core.wasm npm test
+```
+
 Test fixtures are generated with real Office libraries: see `test/fixtures/generate.py`.
+See [DOCS.md](DOCS.md) (Russian) for the full guide and internals.
 
 ## License
 

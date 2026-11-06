@@ -1,7 +1,7 @@
 {
   "name": "coffee-templater",
   "version": "0.1.0",
-  "description": "Open-source templating engine for DOCX, XLSX and PPTX: variables, loops, conditions, filters, images, plus parsing documents to JSON and building them back.",
+  "description": "Templating for DOCX, XLSX and PPTX (variables, loops, conditions, filters, images) and a JSON document model — powered by the coffee-templater-engine (Rust → WebAssembly).",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
@@ -39,22 +39,34 @@
     "powerpoint",
     "ooxml",
     "docxtemplater",
-    "mail-merge"
+    "mail-merge",
+    "wasm",
+    "webassembly",
+    "rust"
   ],
   "scripts": {
+    "engine": "node scripts/fetch-engine.mjs",
+    "pretest": "npm run engine --silent",
+    "pretypecheck": "npm run engine --silent",
+    "prebuild": "npm run engine --silent",
     "build": "tsup",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run typecheck && npm test && npm run build"
   },
-  "dependencies": {
-    "fflate": "^0.8.2"
-  },
   "devDependencies": {
     "@types/node": "^26.6.6",
     "tsup": "^8.5.1",
     "typescript": "~5.9",
     "vitest": "^5.1.0"
+  },
+  "coffeeEngine": {
+    "repository": "vitJR1/coffee-templater-engine",
+    "version": "0.1.0",
+    "sha256": null
+  },
+  "dependencies": {
+    "fflate": "^0.8.2"
   }
 }

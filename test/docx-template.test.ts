@@ -173,8 +173,17 @@ describe('sections', () => {
 describe('filters', () => {
   it('applies built-in filters', () => {
     const tpl = docx(p('{{name | upper}}|{{missing | default: "—"}}|{{n | number: 2}}|{{d | date: "DD.MM.YYYY"}}|{{list | join: " / "}}|{{text | truncate: 5}}'))
-    const out = t.render(tpl, { name: 'ann', n: 1234567.891, d: new Date(2024, 0, 31), list: ['a', 'b'], text: 'abcdefgh' })
+    const out = t.render(tpl, { name: 'ann', n: 1234567.891, d: new Date(Date.UTC(2024, 0, 31)), list: ['a', 'b'], text: 'abcdefgh' })
     expect(body(out)).toBe('ANN|—|1 234 567,89|31.01.2024|a / b|abcd…')
+  })
+
+  it('formats dates in UTC by default and in a configured time zone', () => {
+    const tpl = docx(p('{{d | date: "DD.MM.YYYY HH:mm"}}'))
+    const d = new Date('2024-01-30T21:30:00Z')
+    expect(body(t.render(tpl, { d }))).toBe('30.01.2024 21:30')
+    expect(body(createTemplater({ timeZone: 'Europe/Moscow' }).render(tpl, { d }))).toBe('31.01.2024 00:30')
+    expect(body(createTemplater({ timeZone: 'America/New_York' }).render(tpl, { d }))).toBe('30.01.2024 16:30')
+    expect(() => createTemplater({ timeZone: 'Nowhere/City' })).toThrow(RangeError)
   })
 
   it('accepts typographic quotes inserted by Word autocorrect', () => {

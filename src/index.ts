@@ -1,28 +1,27 @@
 // Templating
 export { Templater, Template, createTemplater, render } from './templater'
-export type { InspectResult, TemplatePartInfo } from './templater'
-export type { TemplaterOptions, TagInfo, TagSyntax, FilterFn } from './template/options'
-export type { TemplateTag } from './template/engine'
-export type { SectionMode } from './template/tags'
-export { builtinFilters, formatDate, formatNumber } from './template/filters'
+export type {
+  TemplaterOptions, TagInfo, TagSyntax, FilterFn, Limits, InspectResult, TemplatePartInfo, TemplateTag, SectionMode,
+  ImageValue, DocumentFormat, BinaryInput,
+} from './types'
 export { TemplateError } from './errors'
-export type { TemplateErrorCode } from './errors'
-export type { ImageValue } from './image'
+export type { TemplateErrorCode, TemplateErrorInfo } from './errors'
 
 // Document model (parse → JSON → build)
-export { parse, parseDocxFile, parseXlsxFile, parsePptxFile, build, extractText } from './model'
-export type { OfficeDocument, BuildOptions } from './model'
+export { parse, parseDocxFile, parseXlsxFile, parsePptxFile, build, extractText, detectFormat } from './model'
+export type { ParseOptions, BuildOptions } from './model'
 export type {
+  OfficeDocument,
   DocxDocument, DocxPart, DocxBlock, DocxParagraph, DocxRun, DocxRunStyle, DocxBreak, DocxHyperlink, DocxRaw,
   DocxInline, DocxTable, DocxTableRow, DocxTableCell,
-} from './model/docx'
-export type { XlsxDocument, XlsxSheet, XlsxRow, XlsxCell, XlsxValue } from './model/xlsx'
+  XlsxDocument, XlsxSheet, XlsxRow, XlsxCell, XlsxValue,
+  PptxDocument, PptxSlide, PptxShape, PptxTextShape, PptxTableShape, PptxOtherShape, PptxParagraph, PptxRun, PptxRaw,
+  PptxInline,
+} from './model/types'
 export {
   sheetToArrays, sheetToObjects, sheetFromArrays, columnToIndex, indexToColumn, parseRef, serialToDate, dateToSerial,
-} from './model/xlsx'
-export type {
-  PptxDocument, PptxSlide, PptxShape, PptxTextShape, PptxTableShape, PptxOtherShape, PptxParagraph, PptxRun, PptxRaw, PptxInline,
-} from './model/pptx'
+} from './model/sheets'
 
-export type { DocumentFormat } from './formats/adapter'
-export type { BinaryInput } from './package'
+// Engine
+export { initEngine, resetEngine, engineInfo, ENGINE_VERSION } from './engine/core'
+export type { EngineInfo } from './engine/core'
