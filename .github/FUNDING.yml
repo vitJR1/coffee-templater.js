@@ -1,0 +1,17 @@
+# Shows the "Sponsor" button at the top of the GitHub repository.
+# Uncomment the platforms you use and fill in your username / link.
+# Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/displaying-a-sponsor-button-in-your-repository
+#
+# The button appears only when at least one entry below is uncommented.
+
+# github: vitJR1                       # GitHub Sponsors username (up to 4: [user1, user2])
+# ko_fi: your-username                 # https://ko-fi.com/your-username
+# buy_me_a_coffee: your-username       # https://buymeacoffee.com/your-username
+# open_collective: your-project        # https://opencollective.com/your-project
+# liberapay: your-username             # https://liberapay.com/your-username
+# patreon: your-username               # https://patreon.com/your-username
+
+# Any other links (Boosty, CloudTips, PayPal, a page with crypto addresses, ...), up to 4:
+# custom:
+#   - https://boosty.to/your-username
+#   - https://pay.cloudtips.ru/p/your-id
