@@ -1,4 +1,4 @@
-# coffee-templater
+# coffee-templater-without rust engine
 
 Open-source templating engine for **Word (.docx)**, **Excel (.xlsx)** and **PowerPoint (.pptx)** — plus a
 JSON document model to parse Office files on the backend and build them back.
