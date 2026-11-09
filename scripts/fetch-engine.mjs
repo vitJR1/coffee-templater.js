@@ -44,6 +44,51 @@ function checkWasm(buf, where) {
   if (buf.length < 8 || buf[0] !== 0x00 || buf[1] !== 0x61 || buf[2] !== 0x73 || buf[3] !== 0x6d) fail(`${where} is not a WebAssembly binary`)
 }
 
+/** Delays before the 2nd, 3rd and 4th attempt. GitHub answers 5xx/429 under load, briefly. */
+const RETRY_DELAYS_MS = [2000, 5000, 10000]
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+
+/**
+ * Downloads a release asset, retrying network errors, 429 and 5xx. With GITHUB_TOKEN (set in CI) the
+ * request is authenticated: GitHub throttles anonymous downloads first. The token goes to github.com
+ * only; fetch drops it on the redirect to the asset storage.
+ */
+async function fetchWithRetry(url) {
+  const token = process.env.GITHUB_TOKEN
+  let auth = Boolean(token)
+  let last = ''
+  for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt++) {
+    if (attempt > 0) {
+      const delay = RETRY_DELAYS_MS[attempt - 1]
+      console.warn(`[coffee-engine] ${last}; retrying in ${delay / 1000} s (attempt ${attempt + 1} of ${RETRY_DELAYS_MS.length + 1})`)
+      await sleep(delay)
+    }
+    try {
+      const res = await fetch(url, { redirect: 'follow', headers: auth ? { Authorization: `Bearer ${token}` } : {} })
+      if (res.ok) return res
+      if (auth && (res.status === 401 || res.status === 403)) {
+        // a token without access to this repository: try anonymously
+        auth = false
+        last = `HTTP ${res.status} with GITHUB_TOKEN`
+        continue
+      }
+      if (res.status !== 429 && res.status < 500) {
+        fail(
+          `Cannot download the engine: ${url} → HTTP ${res.status}.\n` +
+            `Make sure release ${tag} of ${pin.repository} exists, or set COFFEE_ENGINE_WASM=/path/to/coffee_core.wasm.`,
+        )
+      }
+      last = `HTTP ${res.status}`
+    } catch (e) {
+      last = e.message
+    }
+  }
+  fail(
+    `Cannot download the engine from ${url} after ${RETRY_DELAYS_MS.length + 1} attempts: ${last}.\n` +
+      'GitHub may be having trouble; try again later, or set COFFEE_ENGINE_WASM to a local coffee_core.wasm to build offline.',
+  )
+}
+
 async function download() {
   const cacheDir = join(ROOT, 'node_modules', '.cache', 'coffee-engine')
   const cached = join(cacheDir, `coffee_core-${tag}.wasm`)
@@ -52,18 +97,7 @@ async function download() {
     if (!pin.sha256 || sha256(buf) === pin.sha256) return { buf, source: `cache (${tag})` }
   }
   const url = `https://github.com/${pin.repository}/releases/download/${tag}/coffee_core.wasm`
-  let res
-  try {
-    res = await fetch(url, { redirect: 'follow' })
-  } catch (e) {
-    fail(`Cannot download the engine from ${url}: ${e.message}\nSet COFFEE_ENGINE_WASM to a local coffee_core.wasm to build offline.`)
-  }
-  if (!res.ok) {
-    fail(
-      `Cannot download the engine: ${url} → HTTP ${res.status}.\n` +
-        `Make sure release ${tag} of ${pin.repository} exists, or set COFFEE_ENGINE_WASM=/path/to/coffee_core.wasm.`,
-    )
-  }
+  const res = await fetchWithRetry(url)
   const buf = Buffer.from(await res.arrayBuffer())
   checkWasm(buf, url)
   const actual = sha256(buf)
@@ -94,6 +128,8 @@ async function main() {
       console.warn(`[coffee-engine] note: local engine differs from the pinned ${tag} (sha256 ${sha256(buf)})`)
     }
   } else {
+    // already generated for the pinned release (e.g. by an earlier CI step): nothing to download
+    if (!rolling && pin.sha256 && existsSync(OUT) && readFileSync(OUT, 'utf8').includes(`// format ${FORMAT} · sha256 ${pin.sha256}`)) return
     ;({ buf, source } = await download())
   }
 

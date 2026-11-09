@@ -66,6 +66,10 @@ jobs:
             exit 1
           fi
 
+      # the engine is downloaded before `npm ci`, so the token is not visible to install scripts
+      - run: node scripts/fetch-engine.mjs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
       - run: npm ci          # also builds dist via the `prepare` script
       - run: npm run typecheck
       - run: npm test

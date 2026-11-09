@@ -17,6 +17,10 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: npm
+      # the engine is downloaded before `npm ci`, so the token is not visible to install scripts
+      - run: node scripts/fetch-engine.mjs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
@@ -33,6 +37,10 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      # the engine is downloaded before `npm ci`, so the token is not visible to install scripts
+      - run: node scripts/fetch-engine.mjs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
       - run: npm ci
       - run: npm run build
       - name: Pack
