@@ -949,14 +949,14 @@ npm run engine      # только обновить встроенное ядр�
 Версия ядра задаётся в `package.json`:
 
 ```json
-"coffeeEngine": { "repository": "vitJR1/coffee-templater-engine", "version": "0.1.1", "sha256": "1ef3bade…" }
+"coffeeEngine": { "repository": "vitJR1/coffee-templater-engine", "version": "0.1.2", "sha256": "870674f1…" }
 ```
 
 - `release` — необязательное поле: из какого GitHub Release ядра брать `coffee_core.wasm` (по умолчанию `v<version>`).
   - **Плавающий релиз** (`nightly`) обновляется при каждом пуше в `main` ядра. Он подходит для
     разработки и CI: библиотека всегда тестируется с актуальным ядром. Такой релиз не кэшируется
     и не сверяется по sha256.
-  - **Релиз версии** (`v0.1.1`) неизменен. Он кэшируется в `node_modules/.cache/coffee-engine`
+  - **Релиз версии** (`v0.1.2`) неизменен. Он кэшируется в `node_modules/.cache/coffee-engine`
     и проверяется по `sha256`.
 - `npm run engine` запускается автоматически перед `test`, `typecheck` и `build`.
 - **Публикация в npm** возможна только с релизом версии и указанным `sha256`: workflow `release.yml`
