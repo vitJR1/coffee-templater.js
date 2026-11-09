@@ -1,6 +1,6 @@
 {
   "name": "coffee-templater",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Templating for DOCX, XLSX and PPTX (variables, loops, conditions, filters, images) and a JSON document model — powered by the coffee-templater-engine (Rust → WebAssembly).",
   "license": "MIT",
   "author": "vitJR1",

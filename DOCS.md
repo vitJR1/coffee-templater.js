@@ -38,9 +38,9 @@ npm install coffee-templater
 
 ```bash
 # по тегу, ветке или коммиту: npm склонирует репозиторий и соберёт пакет (скрипт prepare)
-npm install github:vitJR1/coffee-templater.js#v0.1.0
+npm install github:vitJR1/coffee-templater.js#v0.1.1
 # или готовый пакет из GitHub Release (без сборки на вашей стороне)
-npm install https://github.com/vitJR1/coffee-templater.js/releases/download/v0.1.0/coffee-templater-0.1.0.tgz
+npm install https://github.com/vitJR1/coffee-templater.js/releases/download/v0.1.1/coffee-templater-0.1.1.tgz
 ```
 
 - Node.js ≥ 18 или любой современный браузер. Нативных зависимостей нет: ядро — это WebAssembly,
