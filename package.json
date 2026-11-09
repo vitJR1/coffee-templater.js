@@ -67,8 +67,8 @@
   },
   "coffeeEngine": {
     "repository": "vitJR1/coffee-templater-engine",
-    "version": "0.1.0",
-    "sha256": "134cace7305c5d113a3fb3b2f4bc22c4fdc58ffcd614c439944c36f9647533c8"
+    "version": "0.1.1",
+    "sha256": "1ef3badefadfe0d5506e367046965b32be03b210785e406bcfc861a32e37d1cb"
   },
   "dependencies": {
     "fflate": "^0.8.2"
