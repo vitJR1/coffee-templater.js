@@ -59,7 +59,7 @@ jobs:
 
       - name: Pack
         id: pack
-        run: echo "file=$(npm pack --silent)" >> "$GITHUB_OUTPUT"
+        run: echo "file=$(npm pack --ignore-scripts --silent)" >> "$GITHUB_OUTPUT"
 
       - name: Create or update GitHub Release
         env:
