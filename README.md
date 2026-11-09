@@ -23,9 +23,9 @@ libraries, so documents render identically everywhere.
 npm install coffee-templater
 
 # or straight from GitHub (a tag, branch or commit):
-npm install github:vitJR1/coffee-templater.js#v0.1.1
+npm install github:vitJR1/coffee-templater.js#v0.1.2
 # or the prebuilt package attached to a GitHub Release:
-npm install https://github.com/vitJR1/coffee-templater.js/releases/download/v0.1.1/coffee-templater-0.1.1.tgz
+npm install https://github.com/vitJR1/coffee-templater.js/releases/download/v0.1.2/coffee-templater-0.1.2.tgz
 ```
 
 ## Quick start
