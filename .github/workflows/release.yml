@@ -1,10 +1,14 @@
 name: Release
 
-# Publishes to npm when a version tag is pushed:
+# Runs when a version tag is pushed:
 #   npm version patch      # bumps package.json and creates tag v0.1.1
 #   git push --follow-tags
 #
-# Requires the repository secret NPM_TOKEN (npm "Automation" or granular token with publish rights).
+# 1. Tests and builds the package.
+# 2. Creates (or updates) the GitHub Release with the packed .tgz attached.
+# 3. Publishes to npm — only if the repository secret NPM_TOKEN is set (npm "Automation" or granular
+#    token with publish rights); otherwise the step is skipped with a notice. To publish an existing
+#    tag later, add the secret and re-run this workflow for the tag.
 # Tags with a pre-release suffix (v1.0.0-beta.1) are published under the `next` dist-tag.
 
 on:
@@ -16,7 +20,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  publish:
+  release:
     runs-on: ubuntu-latest
     permissions:
       contents: write   # create the GitHub Release
@@ -30,15 +34,13 @@ jobs:
           cache: npm
           registry-url: https://registry.npmjs.org
 
-      - run: npm ci
-
       - name: Check the engine is pinned to a fixed release
         run: |
           node -e '
             const e = require("./package.json").coffeeEngine
             const tag = e.release ?? `v${e.version}`
             if (!/^v\d/.test(tag) || !e.sha256) {
-              console.error(`::error::coffeeEngine must point to a version release (v*) with a sha256 to publish; got release "${tag}", sha256 ${e.sha256}`)
+              console.error(`::error::coffeeEngine must point to a version release (v*) with a sha256; got release "${tag}", sha256 ${e.sha256}`)
               process.exit(1)
             }'
 
@@ -51,35 +53,42 @@ jobs:
             exit 1
           fi
 
+      - run: npm ci          # also builds dist via the `prepare` script
       - run: npm run typecheck
       - run: npm test
-      - run: npm run build
+
+      - name: Pack
+        id: pack
+        run: echo "file=$(npm pack --silent)" >> "$GITHUB_OUTPUT"
+
+      - name: Create or update GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          FILE="${{ steps.pack.outputs.file }}"
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "$FILE" --clobber
+          else
+            PRERELEASE=""
+            case "$GITHUB_REF_NAME" in *-*) PRERELEASE="--prerelease" ;; esac
+            gh release create "$GITHUB_REF_NAME" "$FILE" \
+              --title "$GITHUB_REF_NAME" --generate-notes $PRERELEASE
+          fi
 
       - name: Publish to npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           if [ -z "$NODE_AUTH_TOKEN" ]; then
-            echo "::error::NPM_TOKEN secret is not set"
-            exit 1
+            echo "::notice::NPM_TOKEN secret is not set — skipping npm publish"
+            exit 0
           fi
-          ARGS="--access public"
+          NAME=$(node -p "require('./package.json').name")
+          VERSION=$(node -p "require('./package.json').version")
+          if npm view "$NAME@$VERSION" version >/dev/null 2>&1; then
+            echo "::notice::$NAME@$VERSION is already on npm — skipping"
+            exit 0
+          fi
+          ARGS="--access public --provenance"
           case "$GITHUB_REF_NAME" in *-*) ARGS="$ARGS --tag next" ;; esac
-          # provenance needs a `repository` field in package.json pointing to this GitHub repo
-          if node -e "process.exit(require('./package.json').repository ? 0 : 1)"; then
-            ARGS="$ARGS --provenance"
-          fi
           npm publish $ARGS
-
-      - name: Pack for GitHub Release
-        id: pack
-        run: echo "file=$(npm pack --silent)" >> "$GITHUB_OUTPUT"
-
-      - name: Create GitHub Release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          PRERELEASE=""
-          case "$GITHUB_REF_NAME" in *-*) PRERELEASE="--prerelease" ;; esac
-          gh release create "$GITHUB_REF_NAME" "${{ steps.pack.outputs.file }}" \
-            --title "$GITHUB_REF_NAME" --generate-notes $PRERELEASE

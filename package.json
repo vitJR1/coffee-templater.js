@@ -3,6 +3,15 @@
   "version": "0.1.0",
   "description": "Templating for DOCX, XLSX and PPTX (variables, loops, conditions, filters, images) and a JSON document model — powered by the coffee-templater-engine (Rust → WebAssembly).",
   "license": "MIT",
+  "author": "vitJR1",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vitJR1/coffee-templater.js.git"
+  },
+  "homepage": "https://vitjr1.github.io/coffee-templater.js/",
+  "bugs": {
+    "url": "https://github.com/vitJR1/coffee-templater.js/issues"
+  },
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.cjs",
@@ -54,6 +63,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run typecheck && npm test && npm run build",
+    "prepare": "npm run build",
     "build:site": "npm run engine --silent && node scripts/build-site.mjs",
     "site": "npm run build:site --silent && npx --yes serve site -l 4173"
   },

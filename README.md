@@ -21,6 +21,11 @@ libraries, so documents render identically everywhere.
 
 ```bash
 npm install coffee-templater
+
+# or straight from GitHub (a tag, branch or commit):
+npm install github:vitJR1/coffee-templater.js#v0.1.0
+# or the prebuilt package attached to a GitHub Release:
+npm install https://github.com/vitJR1/coffee-templater.js/releases/download/v0.1.0/coffee-templater-0.1.0.tgz
 ```
 
 ## Quick start

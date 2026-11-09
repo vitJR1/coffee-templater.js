@@ -34,6 +34,15 @@
 npm install coffee-templater
 ```
 
+Без npm — прямо из GitHub:
+
+```bash
+# по тегу, ветке или коммиту: npm склонирует репозиторий и соберёт пакет (скрипт prepare)
+npm install github:vitJR1/coffee-templater.js#v0.1.0
+# или готовый пакет из GitHub Release (без сборки на вашей стороне)
+npm install https://github.com/vitJR1/coffee-templater.js/releases/download/v0.1.0/coffee-templater-0.1.0.tgz
+```
+
 - Node.js ≥ 18 или любой современный браузер. Нативных зависимостей нет: ядро — это WebAssembly,
   встроенный в бандл (около 380 КБ в сжатом виде). Единственная JS-зависимость —
   [`fflate`](https://github.com/101arrowz/fflate), им ядро распаковывается при первом вызове.
@@ -980,8 +989,8 @@ npm run engine      # только обновить встроенное ядр�
 - **CI** (`.github/workflows/ci.yml`): на каждый push и PR — typecheck, тесты и сборка на Node 22 и 24;
   на push в `main` дополнительно собирается `.tgz` пакета и прикладывается к запуску как артефакт.
 - **Релиз** (`.github/workflows/release.yml`): запускается push'ем тега `v*`, проверяет, что тег
-  совпадает с версией в `package.json`, прогоняет тесты, публикует пакет в npm и создаёт
-  GitHub Release с `.tgz` и автоматическими release notes.
+  совпадает с версией в `package.json`, прогоняет тесты, создаёт GitHub Release с `.tgz`
+  и автоматическими release notes и публикует пакет в npm.
 
   ```bash
   npm version patch          # или minor / major / prerelease --preid beta
@@ -989,10 +998,13 @@ npm run engine      # только обновить встроенное ядр�
   ```
 
   Теги с суффиксом (`v1.0.0-beta.1`) публикуются в npm под dist-tag `next` и помечаются как pre-release.
-  Нужен секрет репозитория `NPM_TOKEN`. Если в `package.json` есть поле `repository`, публикация
-  идёт с npm provenance (подтверждённое происхождение сборки).
+  Для npm нужен секрет репозитория `NPM_TOKEN`. Без него шаг публикации пропускается, а GitHub
+  Release всё равно создаётся. Чтобы опубликовать уже выпущенный тег, добавьте секрет и
+  перезапустите workflow этого тега (Re-run). Публикация идёт с npm provenance (подтверждённое
+  происхождение сборки).
+- **Установка из git** работает благодаря скрипту `prepare`: npm сам скачивает ядро и собирает `dist`.
 
-Оба workflow скачивают ядро из релиза, указанного в `coffeeEngine.release`.
+Оба workflow скачивают ядро из релиза, указанного в `coffeeEngine` (`release` или `v<version>`).
 
 ---
 
