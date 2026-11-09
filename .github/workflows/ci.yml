@@ -38,7 +38,7 @@ jobs:
       - name: Pack
         id: pack
         run: |
-          FILE=$(npm pack --ignore-scripts --silent)
+          FILE=$(npm pack --silent | tail -n 1)
           echo "file=$FILE" >> "$GITHUB_OUTPUT"
           echo "Packed $FILE ($(du -h "$FILE" | cut -f1))" >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
