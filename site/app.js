@@ -40,6 +40,19 @@ document.querySelectorAll('[data-copy]').forEach((btn) =>
   }),
 )
 
+// quick start: JavaScript / Go code tabs (choice is remembered)
+function showCode(lang) {
+  document.querySelectorAll('[data-code-tab]').forEach((b) => b.classList.toggle('active', b.dataset.codeTab === lang))
+  document.querySelectorAll('[data-code]').forEach((el) => (el.hidden = el.dataset.code !== lang))
+}
+document.querySelectorAll('[data-code-tab]').forEach((b) =>
+  b.addEventListener('click', () => {
+    showCode(b.dataset.codeTab)
+    localStorage.setItem('code', b.dataset.codeTab)
+  }),
+)
+if (localStorage.getItem('code') === 'go') showCode('go')
+
 // ------------------------------------------------------------------------------ demo
 
 const SAMPLES = {

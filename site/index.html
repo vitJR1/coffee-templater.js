@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>coffee-templater — fill Word, Excel and PowerPoint templates</title>
-  <meta name="description" content="Open-source templating for .docx, .xlsx and .pptx: variables, loops, conditions, filters and images. Parse Office files to JSON and build them back. Free, MIT.">
+  <meta name="description" content="Open-source templating for .docx, .xlsx and .pptx in JavaScript/TypeScript and Go: variables, loops, conditions, filters and images. Parse Office files to JSON and build them back. Free, MIT.">
   <meta property="og:title" content="coffee-templater">
   <meta property="og:description" content="Fill Word, Excel and PowerPoint templates from your data. Free and open source.">
   <meta name="google-site-verification" content="xNbXCNHcqSDAxydRd1BCVStyjRkkhgGcS1RKbi2d8dI" />
@@ -63,8 +63,16 @@
           <a class="btn" href="https://github.com/vitJR1/coffee-templater.js"><span data-l="en">View on GitHub</span><span data-l="ru">Открыть на GitHub</span></a>
         </div>
         <div class="install">
+          <span class="install-lang">JS</span>
           <code id="install-cmd">npm install coffee-templater</code>
           <button type="button" class="copy" data-copy="#install-cmd" aria-label="Copy">
+            <span data-l="en">Copy</span><span data-l="ru">Копировать</span>
+          </button>
+        </div>
+        <div class="install">
+          <span class="install-lang">Go</span>
+          <code id="install-go">go get github.com/vitJR1/coffee-templater.go</code>
+          <button type="button" class="copy" data-copy="#install-go" aria-label="Copy">
             <span data-l="en">Copy</span><span data-l="ru">Копировать</span>
           </button>
         </div>
@@ -144,7 +152,7 @@
         </div>
         <div class="feature">
           <h3><span data-l="en">Conditions &amp; filters</span><span data-l="ru">Условия и фильтры</span></h3>
-          <p><span data-l="en"><code>{{#if}}…{{else}}</code>, ~40 built-in filters (numbers, currency, dates, sorting) and your own in plain JS.</span><span data-l="ru"><code>{{#if}}…{{else}}</code>, около 40 встроенных фильтров (числа, валюты, даты, сортировка) и свои на обычном JS.</span></p>
+          <p><span data-l="en"><code>{{#if}}…{{else}}</code>, ~40 built-in filters (numbers, currency, dates, sorting) and your own in plain JS or Go.</span><span data-l="ru"><code>{{#if}}…{{else}}</code>, около 40 встроенных фильтров (числа, валюты, даты, сортировка) и свои на обычном JS или Go.</span></p>
         </div>
         <div class="feature">
           <h3><span data-l="en">Your syntax</span><span data-l="ru">Свой синтаксис</span></h3>
@@ -172,7 +180,7 @@
         </div>
         <div class="feature">
           <h3><span data-l="en">Runs everywhere</span><span data-l="ru">Работает везде</span></h3>
-          <p><span data-l="en">Node.js 18+ and browsers, TypeScript types included, no native dependencies.</span><span data-l="ru">Node.js 18+ и браузеры, типы TypeScript в комплекте, без нативных зависимостей.</span></p>
+          <p><span data-l="en">Node.js 18+ and browsers with TypeScript types; Go 1.23+ without cgo. No native dependencies anywhere.</span><span data-l="ru">Node.js 18+ и браузеры с типами TypeScript; Go 1.23+ без cgo. Нигде никаких нативных зависимостей.</span></p>
         </div>
       </div>
     </div>
@@ -286,7 +294,11 @@
   <section class="section" id="start">
     <div class="wrap">
       <h2><span data-l="en">Quick start</span><span data-l="ru">Быстрый старт</span></h2>
-      <div class="code-grid">
+      <div class="code-tabs" role="tablist">
+        <button type="button" class="tab active" data-code-tab="js">JavaScript / TypeScript</button>
+        <button type="button" class="tab" data-code-tab="go">Go</button>
+      </div>
+      <div class="code-grid" data-code="js">
         <div>
           <h3 class="sub"><span data-l="en">Render a template</span><span data-l="ru">Заполнить шаблон</span></h3>
 <pre class="code"><code><span class="k">import</span> { readFileSync, writeFileSync } <span class="k">from</span> <span class="s">'node:fs'</span>
@@ -318,9 +330,51 @@ writeFileSync(<span class="s">'invoice-42.docx'</span>, template.render({
 <span class="c">// ${ total | money: "RUB" }</span></code></pre>
         </div>
       </div>
-      <p class="more">
+      <div class="code-grid" data-code="go" hidden>
+        <div>
+          <h3 class="sub"><span data-l="en">Render a template</span><span data-l="ru">Заполнить шаблон</span></h3>
+<pre class="code"><code><span class="k">import</span> coffee <span class="s">"github.com/vitJR1/coffee-templater.go"</span>
+
+templater := coffee.New(coffee.Options{})
+template, _ := os.ReadFile(<span class="s">"invoice.docx"</span>)
+
+doc, err := templater.Render(ctx, template, <span class="k">map</span>[<span class="k">string</span>]<span class="k">any</span>{
+	<span class="s">"number"</span>: <span class="n">42</span>,
+	<span class="s">"client"</span>: <span class="k">map</span>[<span class="k">string</span>]<span class="k">any</span>{<span class="s">"name"</span>: <span class="s">"Ivan Petrov"</span>},
+	<span class="s">"items"</span>: []<span class="k">map</span>[<span class="k">string</span>]<span class="k">any</span>{
+		{<span class="s">"name"</span>: <span class="s">"Coffee"</span>, <span class="s">"qty"</span>: <span class="n">2</span>, <span class="s">"price"</span>: <span class="n">10.5</span>},
+	},
+	<span class="s">"paid"</span>: <span class="n">false</span>,
+})
+os.WriteFile(<span class="s">"invoice-42.docx"</span>, doc, <span class="n">0o644</span>)</code></pre>
+        </div>
+        <div>
+          <h3 class="sub"><span data-l="en">Read an uploaded Excel file</span><span data-l="ru">Прочитать загруженный Excel</span></h3>
+<pre class="code"><code>book, err := coffee.Parse(ctx, upload)
+rows := coffee.SheetToObjects(book.Sheets[<span class="n">0</span>], <span class="n">1</span>)
+<span class="c">// [map[Name:Tea Qty:2 Date:2024-05-17] …]</span></code></pre>
+          <h3 class="sub"><span data-l="en">Your own filters and syntax</span><span data-l="ru">Свои фильтры и синтаксис</span></h3>
+<pre class="code"><code>coffee.New(coffee.Options{
+	Delimiters: coffee.Delimiters{Start: <span class="s">"${"</span>, End: <span class="s">"}"</span>},
+	TimeZone:   moscow,
+	Filters: <span class="k">map</span>[<span class="k">string</span>]coffee.Filter{
+		<span class="s">"money"</span>: <span class="k">func</span>(v <span class="k">any</span>, args ...<span class="k">any</span>) (<span class="k">any</span>, <span class="k">error</span>) {
+			<span class="k">return</span> fmt.Sprintf(<span class="s">"%.2f %v"</span>, v, args[<span class="n">0</span>]), <span class="k">nil</span>
+		},
+	},
+})
+<span class="c">// ${ total | money: "RUB" }</span></code></pre>
+        </div>
+      </div>
+      <p class="more" data-code="js">
         <a href="https://github.com/vitJR1/coffee-templater.js#readme">README</a> ·
-        <a href="https://github.com/vitJR1/coffee-templater.js/blob/main/DOCS.md"><span data-l="en">Full guide (Russian)</span><span data-l="ru">Полное руководство</span></a>
+        <a href="https://github.com/vitJR1/coffee-templater.js/blob/main/DOCS.md"><span data-l="en">Full guide (Russian)</span><span data-l="ru">Полное руководство</span></a> ·
+        <a href="https://www.npmjs.com/package/coffee-templater">npm</a>
+      </p>
+      <p class="more" data-code="go" hidden>
+        <a href="https://github.com/vitJR1/coffee-templater.go#readme">README</a> ·
+        <a href="https://github.com/vitJR1/coffee-templater.go/blob/main/DOCS.md"><span data-l="en">Full guide (Russian)</span><span data-l="ru">Полное руководство</span></a> ·
+        <a href="https://pkg.go.dev/github.com/vitJR1/coffee-templater.go">pkg.go.dev</a>
       </p>
     </div>
   </section>
@@ -330,18 +384,18 @@ writeFileSync(<span class="s">'invoice-42.docx'</span>, template.render({
     <div class="wrap">
       <h2><span data-l="en">One engine, many languages</span><span data-l="ru">Одно ядро — много языков</span></h2>
       <p class="section-lead">
-        <span data-l="en">All document work happens in <a href="https://github.com/vitJR1/coffee-templater-engine">coffee-templater-engine</a> — a Rust core compiled to WebAssembly and bundled inside the npm package. The same engine is meant to power Go and Python libraries, so a template renders byte-for-byte the same everywhere.</span>
-        <span data-l="ru">Вся работа с документами выполняется в <a href="https://github.com/vitJR1/coffee-templater-engine">coffee-templater-engine</a> — ядре на Rust, скомпилированном в WebAssembly и встроенном в npm-пакет. На этом же ядре будут работать библиотеки для Go и Python, поэтому шаблон везде даёт побайтно одинаковый результат.</span>
+        <span data-l="en">All document work happens in <a href="https://github.com/vitJR1/coffee-templater-engine">coffee-templater-engine</a> — a Rust core compiled to WebAssembly and embedded in every library. JavaScript and Go run the very same engine, so a template renders byte-for-byte the same in Node.js, the browser and Go. Python is next.</span>
+        <span data-l="ru">Вся работа с документами выполняется в <a href="https://github.com/vitJR1/coffee-templater-engine">coffee-templater-engine</a> — ядре на Rust, скомпилированном в WebAssembly и встроенном в каждую библиотеку. JavaScript и Go работают на одном и том же ядре, поэтому шаблон даёт побайтно одинаковый результат в Node.js, браузере и Go. Следующий — Python.</span>
       </p>
-      <div class="arch" aria-hidden="true">
-        <div class="arch-box">
+      <div class="arch">
+        <a class="arch-box" href="https://github.com/vitJR1/coffee-templater.js">
           <strong>JavaScript / TypeScript</strong>
           <span>coffee-templater · npm</span>
-        </div>
-        <div class="arch-box soon">
+        </a>
+        <a class="arch-box" href="https://github.com/vitJR1/coffee-templater.go">
           <strong>Go</strong>
-          <span data-l="en">planned</span><span data-l="ru">в планах</span>
-        </div>
+          <span>coffee-templater.go · wazero</span>
+        </a>
         <div class="arch-box soon">
           <strong>Python</strong>
           <span data-l="en">planned</span><span data-l="ru">в планах</span>
@@ -360,7 +414,8 @@ writeFileSync(<span class="s">'invoice-42.docx'</span>, template.render({
   <div class="wrap footer-inner">
     <span>☕ coffee-templater · MIT</span>
     <nav>
-      <a href="https://github.com/vitJR1/coffee-templater.js">GitHub</a>
+      <a href="https://github.com/vitJR1/coffee-templater.js">GitHub · JS</a>
+      <a href="https://github.com/vitJR1/coffee-templater.go">GitHub · Go</a>
       <a href="https://github.com/vitJR1/coffee-templater-engine">Engine</a>
       <a href="https://github.com/vitJR1/coffee-templater.js/issues"><span data-l="en">Issues</span><span data-l="ru">Задачи</span></a>
     </nav>
